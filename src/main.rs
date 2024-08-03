@@ -1,6 +1,7 @@
 use actix_web::{get, middleware::Logger, web, App, HttpResponse, HttpServer, Responder};
 use env_logger::Env;
 use std::io::Result;
+use tera::Tera;
 
 mod handler;
 
@@ -13,7 +14,9 @@ async fn index() -> impl Responder {
 async fn main() -> Result<()> {
     env_logger::init_from_env(Env::default().default_filter_or("info"));
     HttpServer::new(|| {
+        let mut tera = Tera::new("templates/**/*.html").unwrap();
         App::new()
+            .app_data(web::Data::new(tera))
             .service(handler::index)
             .service(handler::new)
             .service(handler::create)
