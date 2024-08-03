@@ -15,6 +15,8 @@ async fn main() -> Result<()> {
     HttpServer::new(|| {
         App::new()
             .service(handler::index)
+            .service(handler::new)
+            .service(handler::create)
             .service(handler::show)
             .default_service(web::to(handler::not_found))
             .wrap(Logger::default())

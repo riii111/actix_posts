@@ -36,3 +36,19 @@ pub fn get(id: i32) -> Message {
     }
     message
 }
+
+pub fn create(mut message: Message) -> Message {
+    let file = fs::read_to_string(DATA_FILENAME).unwrap();
+    let mut json_data: Vec<Message> = serde_json::from_str(&file).unwrap();
+    let mut max = 0;
+
+    for item in &json_data {
+        max = std::cmp::max(item.id, max);
+    }
+    message.id = max + 1;
+    json_data.push(message);
+
+    let json_str = serde_json::to_string(&json_data).unwrap();
+    let _ = fs::write(DATA_FILENAME, json_str);
+    json_data.pop().unwrap()
+}
