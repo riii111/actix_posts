@@ -1,12 +1,19 @@
 use actix_web::web;
 use tera::Tera;
 
-pub fn configure_app(cfg: &mut web::ServiceConfig) {
-    let tera = Tera::new("templates/**/*.html").unwrap();
-    cfg.app_data(web::Data::new(tera));
-    cfg.service(crate::handler::index);
-    cfg.service(crate::handler::new);
-    cfg.service(crate::handler::create);
-    cfg.service(crate::handler::show);
-    cfg.default_service(web::to(crate::handler::not_found));
+use crate::controllers::posts as post_controller;
+
+pub fn config_app(cfg: &mut web::ServiceConfig) {
+    let tera = web::Data::new(Tera::new("templates/**/*.html").unwrap());
+
+    cfg.app_data(tera.clone())
+        .service(crate::routes::index)
+        .service(
+            web::scope("/posts")
+                .service(post_controller::index)
+                .service(post_controller::new)
+                .service(post_controller::create)
+                .service(post_controller::show),
+        )
+        .default_service(web::to(crate::controllers::posts::not_found));
 }

@@ -3,17 +3,16 @@ use actix_web::{get, post, web, HttpResponse, Responder};
 use chrono::{DateTime, Local};
 use log::info;
 // use serde::{Deserialize, Serialize};
+use crate::models::posts as post_model;
 use actix_session::Session;
 use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages, Level};
 use serde::Deserialize;
 use tera::Context;
 
-mod data;
-
-#[get("/posts")]
+#[get("")]
 pub async fn index(tmpl: web::Data<tera::Tera>, messages: IncomingFlashMessages) -> impl Responder {
     info!("Called index");
-    let posts = data::get_all();
+    let posts = post_model::get_all();
     let mut context = Context::new();
 
     for message in messages.iter() {
@@ -31,7 +30,7 @@ pub async fn index(tmpl: web::Data<tera::Tera>, messages: IncomingFlashMessages)
         .body(body_str)
 }
 
-#[get("/posts/{id}")]
+#[get("/{id}")]
 pub async fn show(
     tmpl: web::Data<tera::Tera>,
     info: web::Path<i32>,
@@ -40,7 +39,7 @@ pub async fn show(
     // Path<i32> = パスパラメータを受け取るための構造体
     info!("Called show");
     let info = info.into_inner();
-    let post = data::get(info);
+    let post = post_model::get(info);
     let mut context = Context::new();
     for message in messages.iter() {
         match message.level() {
@@ -61,7 +60,7 @@ pub async fn not_found() -> impl Responder {
     HttpResponse::NotFound().body("Page not found!")
 }
 
-#[get("/posts/new")]
+#[get("/new")]
 pub async fn new(tmpl: web::Data<tera::Tera>, session: Session) -> impl Responder {
     info!("Called new");
     let mut context = Context::new();
@@ -69,7 +68,7 @@ pub async fn new(tmpl: web::Data<tera::Tera>, session: Session) -> impl Responde
         .get::<String>("sender")
         .unwrap()
         .unwrap_or_else(|| "名無しさん".to_string());
-    let post = data::Message {
+    let post = post_model::Message {
         id: 0,
         sender: sender,
         content: "".to_string(),
@@ -94,17 +93,17 @@ pub struct CreateForm {
     content: String,
 }
 
-#[post("/posts/create")]
+#[post("/create")]
 pub async fn create(params: web::Form<CreateForm>, session: Session) -> impl Responder {
     info!("Called create");
     let now: DateTime<Local> = Local::now();
-    let mut message = data::Message {
+    let mut message = post_model::Message {
         id: 0,
         posted: now.format("%Y-%m-%d%H:%M:%S").to_string(),
         sender: params.sender.clone(),
         content: params.content.clone(),
     };
-    message = data::create(message);
+    message = post_model::create(message);
     if message.id == 0 {
         FlashMessage::error("投稿でエラーが発生しました").send();
     } else {
