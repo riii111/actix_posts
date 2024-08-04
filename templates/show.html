@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% block content %} {% if post.id == 0 %}
+{% extends "base.html" %} {% block content %}{{ super() }} {% if post.id == 0 %}
 <div class="alert alert-danger">見つかりません。</div>
 {% else %} {% include "item.html" %}
 <div class="mb-3">

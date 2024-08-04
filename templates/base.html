@@ -15,7 +15,13 @@
     <div class="container">
       <h1 style="text-align: center">Posts</h1>
       <hr />
-      <div id="container">{% block content %} {% endblock content %}</div>
+      <div id="container">
+        {% block content %} {% if success %}
+        <div class="alert alert-info">{{success}}</div>
+        {% endif %} {% if error %}
+        <div class="alert alert-danger">{{error}}</div>
+        {% endif %} {% endblock content %}
+      </div>
       <hr />
       <div style="text-align: center">Tamaplaza Digital</div>
     </div>

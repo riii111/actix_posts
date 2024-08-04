@@ -1,28 +1,25 @@
-use actix_web::{get, middleware::Logger, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{middleware::Logger, web, App, HttpServer};
+use actix_web::cookie::Key;
 use env_logger::Env;
 use std::io::Result;
-use tera::Tera;
 
+mod config;
+mod routes;
+mod middleware;
 mod handler;
-
-#[get("/")]
-async fn index() -> impl Responder {
-    HttpResponse::Ok().body("Hello, Actix Web!")
-}
 
 #[actix_rt::main]
 async fn main() -> Result<()> {
     env_logger::init_from_env(Env::default().default_filter_or("info"));
-    HttpServer::new(|| {
-        let mut tera = Tera::new("templates/**/*.html").unwrap();
+    let key = Key::generate();
+    let message_framework = middleware::build_flash_messages_framework();
+
+    HttpServer::new(move || {
         App::new()
-            .app_data(web::Data::new(tera))
-            .service(handler::index)
-            .service(handler::new)
-            .service(handler::create)
-            .service(handler::show)
-            .default_service(web::to(handler::not_found))
+            .configure(config::configure_app)
             .wrap(Logger::default())
+            .wrap(message_framework.clone())
+            .wrap(middleware::build_cookie_session_middleware(key.clone()))
     })
     .bind("127.0.0.1:8000")?
     .run()
