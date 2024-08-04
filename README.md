@@ -1,42 +1,15 @@
 # actix_posts
 
 投稿アプリ
+## 一覧画面
+<img width="857" alt="image" src="https://github.com/user-attachments/assets/240f2acb-98b2-4fd9-95c7-8d37d1726c3b">
 
-# レイヤ構造
+## 投稿の詳細
+<img width="835" alt="image" src="https://github.com/user-attachments/assets/b37d421c-d8ad-4dbc-a03a-23bd44b72cd1">
+ 
+## 新規投稿
+<img width="967" alt="image" src="https://github.com/user-attachments/assets/a00f5c51-d1ea-4f86-95a4-20efd940ec8c">
 
-## イメージ
-
-```
-クライアント
-    |
-    v
-[プレゼンテーション層]
-    |
-    v
-handler.rs (リクエスト処理、レスポンス生成)
-    |
-    v
-[アプリケーション層]
-main.rs (アプリケーション設定、ルーティング)
-    |
-    v
-[ドメイン層 / データアクセス層]
-handler/data.rs (データ操作、ビジネスロジック)
-    |
-    v
-データストア（簡易化のため、今回はJSONファイル）
-```
-
-## 詳細
-
-- main.rs<br/>
-  レイヤ: アプリケーション層の一部<br/>
-  役割: アプリケーションのエントリーポイント、サーバーの設定、ルーティングの設定
-  
-- handler.rs<br/>
-  レイヤ: プレゼンテーション層とアプリケーション層の橋渡し<br/>
-  役割: HTTPリクエストの処理、レスポンスの生成、ビジネスロジックの呼び出し
-
-- handler/data.rs<br/>
-  レイヤ: データアクセス層とドメイン層の一部<br/>
-  役割: データの取得・操作、ビジネスロジックの一部実装
+## memo
+- ディレクトリ構成
+  レイヤ構造が分かるように、NestJS風 + actix-web公式のネストルーティング参考に修正済
