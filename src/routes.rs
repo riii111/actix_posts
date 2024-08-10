@@ -18,6 +18,7 @@ pub fn app(cfg: &mut web::ServiceConfig) {
                 // .route("", web::put().to(post_controller::api_update)),
             ),
         )
+        .default_service(web::to(crate::controllers::posts::api_not_found))
         .service(
             web::scope("/posts")
                 .service(post_controller::index)
