@@ -1,6 +1,6 @@
 use crate::payloads::posts::{build_response, ApiResponse, ResponseContent};
 use crate::query_params::PostQueries;
-use crate::repository::{self, posts as post_model};
+use crate::repository::posts as post_model;
 use actix_session::Session;
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages, Level};
@@ -53,7 +53,6 @@ pub async fn show(
     info: web::Path<i32>,
     messages: IncomingFlashMessages,
 ) -> impl Responder {
-    // Path<i32> = パスパラメータを受け取るための構造体
     info!("Called show");
     let info = info.into_inner();
     let post = post_model::get(info);
@@ -82,7 +81,6 @@ pub async fn api_show(info: web::Path<i32>, query: web::Query<PostQueries>) -> i
         .status("OK".to_string())
         .result(ResponseContent::Item(post))
         .build();
-    //HttpResponse::Ok().json(response)
     build_response(&param.format, &response)
 }
 
