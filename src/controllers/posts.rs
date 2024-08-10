@@ -1,6 +1,6 @@
 use crate::payloads::posts::{build_response, ApiResponse, ResponseContent};
 use crate::query_params::PostQueries;
-use crate::repository::posts as post_model;
+use crate::repository::{self, posts as post_model};
 use actix_session::Session;
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages, Level};
@@ -73,8 +73,25 @@ pub async fn show(
         .body(body_str)
 }
 
+pub async fn api_show(info: web::Path<i32>, query: web::Query<PostQueries>) -> impl Responder {
+    info!("Called show API");
+    let info = info.into_inner();
+    let param = query.into_inner();
+    let post = post_model::get(info);
+    let response = ApiResponse::builder()
+        .status("OK".to_string())
+        .result(ResponseContent::Item(post))
+        .build();
+    //HttpResponse::Ok().json(response)
+    build_response(&param.format, &response)
+}
+
 pub async fn not_found() -> impl Responder {
     HttpResponse::NotFound().body("Page not found!")
+}
+
+pub async fn api_not_found() -> impl Responder {
+    HttpResponse::NotFound()
 }
 
 #[get("/new")]
@@ -128,6 +145,24 @@ pub async fn create(params: web::Form<CreateForm>, session: Session) -> impl Res
     }
     let _ = session.insert("sender", params.sender.clone());
     web::Redirect::to(format!("/posts/{}", message.id)).see_other()
+}
+
+pub async fn api_create(params: web::Json<post_model::Message>) -> impl Responder {
+    info!("Called create API");
+    let now: DateTime<Local> = Local::now();
+    let mut message = post_model::Message {
+        id: 0,
+        posted: now.format("%Y-%m-%d %H:%M:%S").to_string(),
+        sender: params.sender.clone(),
+        content: params.content.clone(),
+    };
+    message = post_model::create(message);
+    let response = ApiResponse::builder()
+        .status("OK".to_string())
+        .result(ResponseContent::Item(message))
+        .build();
+    let format: Option<String> = Some("json".to_string());
+    build_response(&format, &response)
 }
 
 // TODO: 編集機能.
