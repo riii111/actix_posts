@@ -9,10 +9,15 @@ pub fn app(cfg: &mut web::ServiceConfig) {
 
     cfg.app_data(tera.clone())
         .service(crate::routes::index)
-        .service(web::scope("/api").service(
-            web::scope("/posts").route("", web::get().to(post_controller::api_index)), // .route("/{id}", web::get().to(post_controller::show))
-                                                                                       // .route("", web::post().to(post_controller::create)),
-        ))
+        .service(
+            web::scope("/api").service(
+                web::scope("/posts")
+                    .route("", web::get().to(post_controller::api_index))
+                    .route("/{id}", web::get().to(post_controller::api_show))
+                    .route("", web::post().to(post_controller::api_create)),
+                // .route("", web::put().to(post_controller::api_update)),
+            ),
+        )
         .service(
             web::scope("/posts")
                 .service(post_controller::index)
