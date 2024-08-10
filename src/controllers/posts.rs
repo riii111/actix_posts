@@ -1,13 +1,18 @@
-use actix_web::{get, post, web, HttpResponse, Responder};
-// use chrono::{DateTime, Duration, Local};
+use crate::payloads::posts::{build_response, ApiResponse, ResponseContent};
+use crate::query_params::PostQueries;
+use crate::repository::posts as post_model;
+use actix_session::Session;
+use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
+use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages, Level};
 use chrono::{DateTime, Local};
 use log::info;
-// use serde::{Deserialize, Serialize};
-use crate::models::posts as post_model;
-use actix_session::Session;
-use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages, Level};
 use serde::Deserialize;
 use tera::Context;
+
+/*
+<name>      : フルスタック、コンテンツ含めて返す
+api_<name>  : APIとして提供する（画面を作成予定）
+ */
 
 #[get("")]
 pub async fn index(tmpl: web::Data<tera::Tera>, messages: IncomingFlashMessages) -> impl Responder {
@@ -28,6 +33,18 @@ pub async fn index(tmpl: web::Data<tera::Tera>, messages: IncomingFlashMessages)
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(body_str)
+}
+
+// APIとして実装
+pub async fn api_index(_req: HttpRequest, query: web::Query<PostQueries>) -> impl Responder {
+    info!("Called index API");
+    let param = query.into_inner();
+    let posts = post_model::get_all();
+    let response = ApiResponse::builder()
+        .status("OK".to_string())
+        .result(ResponseContent::Items(posts))
+        .build();
+    build_response(&param.format, &response)
 }
 
 #[get("/{id}")]
@@ -112,3 +129,33 @@ pub async fn create(params: web::Form<CreateForm>, session: Session) -> impl Res
     let _ = session.insert("sender", params.sender.clone());
     web::Redirect::to(format!("/posts/{}", message.id)).see_other()
 }
+
+// TODO: 編集機能.
+// #[put("/update/{id}")]
+// pub async fn update(
+//     params: web::Form<CreateForm>,
+//     info: web::Path<i32>,
+//     session: Session,
+// ) -> impl Responder {
+//     info!("Called update");
+//     let info = info.into_inner();
+//     let mut message = post_model::get(info);
+
+//     if !params.sender.is_empty() {
+//         message.sender = params.sender.clone();
+//     }
+//     if !params.content.is_empty() {
+//         message.content = params.content.clone();
+//     }
+
+//     message.posted = Local::now().format("%Y-%m-%d%H:%M:%S").to_string();
+
+//     post_model::update(&message);
+
+//     FlashMessage::success("更新しました").send();
+
+//     let _ = session.insert("sender", params.sender.clone());
+//     web::Redirect::to(format!("/posts/{}", message.id)).see_other()
+// }
+
+// TODO: 削除機能.

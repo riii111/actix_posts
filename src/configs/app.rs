@@ -13,7 +13,12 @@ pub fn config_app(cfg: &mut web::ServiceConfig) {
                 .service(post_controller::index)
                 .service(post_controller::new)
                 .service(post_controller::create)
-                .service(post_controller::show),
+                .service(post_controller::show), // .service(post_controller::update),
+        )
+        // そのうち以下に変えたい（好み）↓
+        .service(
+            web::scope("/posts").route("", web::get().to(post_controller::api_index)), // .route("/{id}", web::get().to(post_controller::show))
+                                                                                       // .route("/create", web::post().to(post_controller::create)),
         )
         .default_service(web::to(crate::controllers::posts::not_found));
 }
