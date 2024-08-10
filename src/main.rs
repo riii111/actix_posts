@@ -4,7 +4,6 @@ use actix_web::{middleware::Logger, App, HttpServer};
 use env_logger::Env;
 use std::io::Result;
 
-mod configs;
 mod controllers;
 mod middleware;
 mod payloads;
@@ -20,7 +19,7 @@ async fn main() -> Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            .service(web::scope("/api").configure(configs::app::config_app))
+            .configure(routes::app)
             .wrap(Logger::default())
             .wrap(message_framework.clone())
             .wrap(middleware::session::build_cookie_session_middleware(
