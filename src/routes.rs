@@ -2,7 +2,8 @@ use actix_web::web;
 use actix_web::{get, HttpResponse, Responder};
 use tera::Tera;
 
-use crate::controllers::posts as post_controller;
+use crate::controllers::posts_v1;
+use crate::controllers::posts_v2;
 
 pub fn app(cfg: &mut web::ServiceConfig) {
     let tera = web::Data::new(Tera::new("templates/**/*.html").unwrap());
@@ -12,21 +13,21 @@ pub fn app(cfg: &mut web::ServiceConfig) {
         .service(
             web::scope("/api").service(
                 web::scope("/posts")
-                    .route("", web::get().to(post_controller::api_index))
-                    .route("/{id}", web::get().to(post_controller::api_show))
-                    .route("", web::post().to(post_controller::api_create)),
-                // .route("", web::put().to(post_controller::api_update)),
+                    .route("", web::get().to(posts_v2::index))
+                    .route("/{id}", web::get().to(posts_v2::show))
+                    .route("", web::post().to(posts_v2::create)),
+                // .route("", web::put().to(posts::update)),
             ),
         )
-        .default_service(web::to(crate::controllers::posts::api_not_found))
+        .default_service(web::to(crate::controllers::posts_v2::not_found))
         .service(
             web::scope("/posts")
-                .service(post_controller::index)
-                .service(post_controller::new)
-                .service(post_controller::create)
-                .service(post_controller::show),
+                .service(posts_v1::index)
+                .service(posts_v1::new)
+                .service(posts_v1::create)
+                .service(posts_v1::show),
         )
-        .default_service(web::to(crate::controllers::posts::not_found));
+        .default_service(web::to(crate::controllers::posts_v1::not_found));
 }
 
 #[get("/")]
