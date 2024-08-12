@@ -1,6 +1,7 @@
-use crate::payloads::posts::{build_response, ApiResponse, ResponseContent};
+use crate::payloads::posts::build_response;
 use crate::query_params::PostQueries;
-use crate::repository::posts as post_model;
+use crate::repositories::posts as post_repository;
+use crate::services::posts as post_service;
 use actix_session::Session;
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages, Level};
@@ -9,15 +10,10 @@ use log::info;
 use serde::Deserialize;
 use tera::Context;
 
-/*
-<name>      : フルスタック、コンテンツ含めて返す
-api_<name>  : APIとして提供する（画面を作成予定）
- */
-
 #[get("")]
 pub async fn index(tmpl: web::Data<tera::Tera>, messages: IncomingFlashMessages) -> impl Responder {
     info!("Called index");
-    let posts = post_model::get_all();
+    let posts = post_repository::get_all();
     let mut context = Context::new();
 
     for message in messages.iter() {
@@ -35,15 +31,10 @@ pub async fn index(tmpl: web::Data<tera::Tera>, messages: IncomingFlashMessages)
         .body(body_str)
 }
 
-// APIとして実装
 pub async fn api_index(_req: HttpRequest, query: web::Query<PostQueries>) -> impl Responder {
     info!("Called index API");
     let param = query.into_inner();
-    let posts = post_model::get_all();
-    let response = ApiResponse::builder()
-        .status("OK".to_string())
-        .result(ResponseContent::Items(posts))
-        .build();
+    let response = post_service::get_all_posts();
     build_response(&param.format, &response)
 }
 
@@ -55,7 +46,7 @@ pub async fn show(
 ) -> impl Responder {
     info!("Called show");
     let info = info.into_inner();
-    let post = post_model::get(info);
+    let post = post_repository::get(info);
     let mut context = Context::new();
     for message in messages.iter() {
         match message.level() {
@@ -76,11 +67,7 @@ pub async fn api_show(info: web::Path<i32>, query: web::Query<PostQueries>) -> i
     info!("Called show API");
     let info = info.into_inner();
     let param = query.into_inner();
-    let post = post_model::get(info);
-    let response = ApiResponse::builder()
-        .status("OK".to_string())
-        .result(ResponseContent::Item(post))
-        .build();
+    let response = post_service::get_post(info);
     build_response(&param.format, &response)
 }
 
@@ -89,7 +76,8 @@ pub async fn not_found() -> impl Responder {
 }
 
 pub async fn api_not_found() -> impl Responder {
-    HttpResponse::NotFound()
+    let response = post_service::not_found();
+    HttpResponse::NotFound().json(response)
 }
 
 #[get("/new")]
@@ -100,7 +88,7 @@ pub async fn new(tmpl: web::Data<tera::Tera>, session: Session) -> impl Responde
         .get::<String>("sender")
         .unwrap()
         .unwrap_or_else(|| "名無しさん".to_string());
-    let post = post_model::Message {
+    let post = post_repository::Message {
         id: 0,
         sender: sender,
         content: "".to_string(),
@@ -129,13 +117,13 @@ pub struct CreateForm {
 pub async fn create(params: web::Form<CreateForm>, session: Session) -> impl Responder {
     info!("Called create");
     let now: DateTime<Local> = Local::now();
-    let mut message = post_model::Message {
+    let mut message = post_repository::Message {
         id: 0,
         posted: now.format("%Y-%m-%d%H:%M:%S").to_string(),
         sender: params.sender.clone(),
         content: params.content.clone(),
     };
-    message = post_model::create(message);
+    message = post_repository::create(message);
     if message.id == 0 {
         FlashMessage::error("投稿でエラーが発生しました").send();
     } else {
@@ -145,20 +133,16 @@ pub async fn create(params: web::Form<CreateForm>, session: Session) -> impl Res
     web::Redirect::to(format!("/posts/{}", message.id)).see_other()
 }
 
-pub async fn api_create(params: web::Json<post_model::Message>) -> impl Responder {
+pub async fn api_create(params: web::Json<post_repository::Message>) -> impl Responder {
     info!("Called create API");
     let now: DateTime<Local> = Local::now();
-    let mut message = post_model::Message {
+    let message = post_repository::Message {
         id: 0,
         posted: now.format("%Y-%m-%d %H:%M:%S").to_string(),
         sender: params.sender.clone(),
         content: params.content.clone(),
     };
-    message = post_model::create(message);
-    let response = ApiResponse::builder()
-        .status("OK".to_string())
-        .result(ResponseContent::Item(message))
-        .build();
+    let response = post_service::create_post(message);
     let format: Option<String> = Some("json".to_string());
     build_response(&format, &response)
 }
@@ -172,7 +156,7 @@ pub async fn api_create(params: web::Json<post_model::Message>) -> impl Responde
 // ) -> impl Responder {
 //     info!("Called update");
 //     let info = info.into_inner();
-//     let mut message = post_model::get(info);
+//     let mut message = post_repository::get(info);
 
 //     if !params.sender.is_empty() {
 //         message.sender = params.sender.clone();
@@ -183,7 +167,7 @@ pub async fn api_create(params: web::Json<post_model::Message>) -> impl Responde
 
 //     message.posted = Local::now().format("%Y-%m-%d%H:%M:%S").to_string();
 
-//     post_model::update(&message);
+//     post_repository::update(&message);
 
 //     FlashMessage::success("更新しました").send();
 

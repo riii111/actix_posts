@@ -1,0 +1,37 @@
+use crate::payloads::posts::{ApiResponse, ResponseContent};
+use crate::repositories::posts as post_model;
+use log::info;
+
+pub fn get_all_posts() -> ApiResponse {
+    info!("サービス: 全ての投稿を取得");
+    let posts = post_model::get_all();
+    ApiResponse::builder()
+        .status("OK".to_string())
+        .result(ResponseContent::Items(posts))
+        .build()
+}
+
+pub fn get_post(id: i32) -> ApiResponse {
+    info!("サービス: 特定の投稿を取得");
+    let post = post_model::get(id);
+    ApiResponse::builder()
+        .status("OK".to_string())
+        .result(ResponseContent::Item(post))
+        .build()
+}
+
+pub fn create_post(message: post_model::Message) -> ApiResponse {
+    info!("サービス: 新しい投稿を作成");
+    let created_message = post_model::create(message);
+    ApiResponse::builder()
+        .status("OK".to_string())
+        .result(ResponseContent::Item(created_message))
+        .build()
+}
+
+pub fn not_found() -> ApiResponse {
+    ApiResponse::builder()
+        .status("NotFound".to_string())
+        .result(ResponseContent::None)
+        .build()
+}

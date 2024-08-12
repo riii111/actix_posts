@@ -1,4 +1,4 @@
-use crate::repository::posts as post_model;
+use crate::repositories::posts as post_model;
 use actix_web::{HttpResponse, Responder};
 use serde::Serialize;
 
