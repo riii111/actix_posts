@@ -3,10 +3,10 @@
 use crate::common::response::ResponseContent;
 use crate::common::response_builder::ApiResponseBuilder;
 use crate::common::response_formatter::build_response;
-use crate::models::posts::Message;
+use crate::models::posts::Post;
 use crate::query_params::PostQueries;
 use crate::services::posts as post_service;
-use actix_web::{web, HttpRequest, HttpResponse, Responder};
+use actix_web::{web, HttpRequest, HttpResponse};
 use chrono::{DateTime, Local};
 use log::{error, info};
 
@@ -59,25 +59,55 @@ pub async fn show(info: web::Path<i32>, query: web::Query<PostQueries>) -> HttpR
     }
 }
 
-pub async fn not_found() -> impl Responder {
-    let response = post_service::not_found();
+// pub async fn not_found() -> impl Responder {
+//     let response = post_service::not_found();
+//     HttpResponse::NotFound().json(response)
+// }
+pub async fn not_found() -> HttpResponse {
+    let response = post_service::not_found().await;
     HttpResponse::NotFound().json(response)
 }
 
-pub async fn create(params: web::Json<Message>) -> impl Responder {
+// pub async fn create(params: web::Json<Message>) -> impl Responder {
+//     info!("Called create API");
+//     let now: DateTime<Local> = Local::now();
+//     let message = Message {
+//         id: 0,
+//         posted: now.format("%Y-%m-%d %H:%M:%S").to_string(),
+//         sender: params.sender.clone(),
+//         content: params.content.clone(),
+//     };
+//     let response = post_service::create_post(message);
+//     let format: Option<String> = Some("json".to_string());
+//     build_response(&format, &response)
+// }
+
+pub async fn create(params: web::Json<Post>) -> HttpResponse {
     info!("Called create API");
     let now: DateTime<Local> = Local::now();
-    let message = Message {
-        id: 0,
+    let post = Post {
+        id: 0, // This will be set in the repository
         posted: now.format("%Y-%m-%d %H:%M:%S").to_string(),
         sender: params.sender.clone(),
         content: params.content.clone(),
     };
-    let response = post_service::create_post(message);
-    let format: Option<String> = Some("json".to_string());
-    build_response(&format, &response)
-}
 
+    match post_service::create_post(post).await {
+        Ok(response) => {
+            let format = Some("json".to_string());
+            build_response(&format, &response)
+        }
+        Err(e) => {
+            error!("Error in create: {:?}", e);
+            HttpResponse::InternalServerError().json(
+                ApiResponseBuilder::new()
+                    .status("Error".to_string())
+                    .result(ResponseContent::Reason("Internal server error".to_string()))
+                    .build(),
+            )
+        }
+    }
+}
 // TODO: 編集機能.
 
 // TODO: 削除機能.
