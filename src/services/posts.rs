@@ -1,6 +1,6 @@
 use crate::common::response::{ApiResponse, ResponseContent};
 use crate::common::response_builder::ApiResponseBuilder;
-use crate::models::posts::{Message, Post};
+use crate::models::posts::Post;
 use crate::repositories::posts_v2 as post_v2_repository;
 use anyhow::Result;
 
@@ -34,23 +34,8 @@ pub async fn get_post(id: i32) -> Result<ApiResponse> {
     }
 }
 
-pub fn create_post(message: Message) -> ApiResponse {
-    let created_message = post_v2_repository::create(message);
-    ApiResponseBuilder::new()
-        .status("OK".to_string())
-        .result(ResponseContent::Item(created_message))
-        .build()
-}
-
-pub fn not_found() -> ApiResponse {
-    ApiResponseBuilder::new()
-        .status("NotFound".to_string())
-        .result(ResponseContent::None)
-        .build()
-}
-
 pub async fn create_post(post: Post) -> Result<ApiResponse> {
-    let created_post = post_repository::create(post).await?;
+    let created_post = post_v2_repository::create(post).await?;
     Ok(ApiResponseBuilder::new()
         .status("OK".to_string())
         .result(ResponseContent::Item(created_post))

@@ -235,6 +235,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tera",
+ "tokio",
 ]
 
 [[package]]
