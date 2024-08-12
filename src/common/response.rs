@@ -1,4 +1,4 @@
-use crate::repositories::posts::Message;
+use crate::models::posts::Message;
 use serde::Serialize;
 
 #[derive(Serialize, Debug)]

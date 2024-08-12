@@ -1,13 +1,5 @@
-use serde::{Deserialize, Serialize};
+use crate::models::posts::Message;
 use std::fs;
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Message {
-    pub id: i32,
-    pub posted: String,
-    pub sender: String,
-    pub content: String,
-}
 
 static DATA_FILENAME: &str = "data.json";
 

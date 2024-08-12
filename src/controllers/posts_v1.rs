@@ -1,6 +1,7 @@
 /* コンテンツを含めて返すposts */
 
-use crate::repositories::posts as post_repository;
+use crate::models::posts::Message;
+use crate::repositories::posts_v1 as post_v1_repository;
 use actix_session::Session;
 use actix_web::{get, post, web, HttpResponse, Responder};
 use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages, Level};
@@ -67,7 +68,7 @@ pub async fn new(tmpl: web::Data<tera::Tera>, session: Session) -> impl Responde
         .get::<String>("sender")
         .unwrap()
         .unwrap_or_else(|| "名無しさん".to_string());
-    let post = post_repository::Message {
+    let post = Message {
         id: 0,
         sender: sender,
         content: "".to_string(),
@@ -96,13 +97,13 @@ pub struct CreateForm {
 pub async fn create(params: web::Form<CreateForm>, session: Session) -> impl Responder {
     info!("Called create");
     let now: DateTime<Local> = Local::now();
-    let mut message = post_repository::Message {
+    let mut message = Message {
         id: 0,
         posted: now.format("%Y-%m-%d%H:%M:%S").to_string(),
         sender: params.sender.clone(),
         content: params.content.clone(),
     };
-    message = post_repository::create(message);
+    message = post_v1_repository::create(message);
     if message.id == 0 {
         FlashMessage::error("投稿でエラーが発生しました").send();
     } else {

@@ -3,8 +3,9 @@
 use crate::common::response::ResponseContent;
 use crate::common::response_builder::ApiResponseBuilder;
 use crate::common::response_formatter::build_response;
+use crate::models::posts::Message;
 use crate::query_params::PostQueries;
-use crate::repositories::posts as post_repository;
+use crate::repositories::posts_v2 as post_repository;
 use crate::services::posts as post_service;
 use actix_web::{web, HttpRequest, HttpResponse, Responder};
 use chrono::{DateTime, Local};
@@ -64,10 +65,10 @@ pub async fn not_found() -> impl Responder {
     HttpResponse::NotFound().json(response)
 }
 
-pub async fn create(params: web::Json<post_repository::Message>) -> impl Responder {
+pub async fn create(params: web::Json<Message>) -> impl Responder {
     info!("Called create API");
     let now: DateTime<Local> = Local::now();
-    let message = post_repository::Message {
+    let message = Message {
         id: 0,
         posted: now.format("%Y-%m-%d %H:%M:%S").to_string(),
         sender: params.sender.clone(),
