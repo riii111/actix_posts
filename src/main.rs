@@ -6,6 +6,7 @@ use std::io::Result;
 mod common;
 mod controllers;
 mod middleware;
+mod models;
 mod query_params;
 mod repositories;
 mod routes;
