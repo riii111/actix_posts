@@ -2,8 +2,8 @@ use actix_web::web;
 use actix_web::{get, HttpResponse, Responder};
 use tera::Tera;
 
-use crate::controllers::posts;
 use crate::controllers::posts_v1;
+use crate::controllers::posts_v2;
 
 pub fn app(cfg: &mut web::ServiceConfig) {
     let tera = web::Data::new(Tera::new("templates/**/*.html").unwrap());
@@ -13,13 +13,13 @@ pub fn app(cfg: &mut web::ServiceConfig) {
         .service(
             web::scope("/api").service(
                 web::scope("/posts")
-                    .route("", web::get().to(posts::api_index))
-                    .route("/{id}", web::get().to(posts::api_show))
-                    .route("", web::post().to(posts::api_create)),
+                    .route("", web::get().to(posts_v2::api_index))
+                    .route("/{id}", web::get().to(posts_v2::api_show))
+                    .route("", web::post().to(posts_v2::api_create)),
                 // .route("", web::put().to(posts::api_update)),
             ),
         )
-        .default_service(web::to(crate::controllers::posts::api_not_found))
+        .default_service(web::to(crate::controllers::posts_v2::api_not_found))
         .service(
             web::scope("/posts")
                 .service(posts_v1::index)
