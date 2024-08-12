@@ -1,11 +1,11 @@
-use crate::query_params::PostQueries;
+/* コンテンツを含めて返すposts */
+
 use crate::repositories::posts as post_repository;
-use crate::services::posts as post_service;
 use actix_session::Session;
-use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
+use actix_web::{get, post, web, HttpResponse, Responder};
 use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages, Level};
 use chrono::{DateTime, Local};
-use log::{error, info};
+use log::info;
 use serde::Deserialize;
 use tera::Context;
 

@@ -1,3 +1,5 @@
+/* API用のposts */
+
 use crate::common::response::ResponseContent;
 use crate::common::response_builder::ApiResponseBuilder;
 use crate::common::response_formatter::build_response;
