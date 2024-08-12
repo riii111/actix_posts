@@ -5,7 +5,6 @@ use crate::common::response_builder::ApiResponseBuilder;
 use crate::common::response_formatter::build_response;
 use crate::models::posts::Message;
 use crate::query_params::PostQueries;
-use crate::repositories::posts_v2 as post_repository;
 use crate::services::posts as post_service;
 use actix_web::{web, HttpRequest, HttpResponse, Responder};
 use chrono::{DateTime, Local};
