@@ -25,7 +25,7 @@ pub async fn create(mut post: Post) -> Result<Post> {
     post.id = max_id + 1;
     posts.push(post.clone());
 
-    let json_str = serde_json::to_string(&posts).context("Failed to serialize posts to JSON")?;
+    let json_str = serde_json::to_string(&posts)?;
     fs::write(DATA_FILENAME, json_str)
         .await
         .context("Failed to write data to file")?;
