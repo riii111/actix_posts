@@ -1,4 +1,4 @@
-use crate::common::response_builder::ApiResponseBuilder;
+use crate::common::response::{ApiResponse, ResponseContent};
 use crate::common::response_formatter::build_response;
 use crate::query_params::PostQueries;
 use crate::repositories::posts as post_repository;
@@ -7,7 +7,7 @@ use actix_session::Session;
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages, Level};
 use chrono::{DateTime, Local};
-use log::info;
+use log::{error, info};
 use serde::Deserialize;
 use tera::Context;
 
@@ -32,11 +32,28 @@ pub async fn index(tmpl: web::Data<tera::Tera>, messages: IncomingFlashMessages)
         .body(body_str)
 }
 
-pub async fn api_index(_req: HttpRequest, query: web::Query<PostQueries>) -> impl Responder {
+// pub async fn api_index(_req: HttpRequest, query: web::Query<PostQueries>) -> impl Responder {
+//     info!("Called index API");
+//     let param = query.into_inner();
+//     let response = post_service::get_all_posts();
+//     build_response(&param.format, &response)
+// }
+
+pub async fn api_index(_req: HttpRequest, query: web::Query<PostQueries>) -> HttpResponse {
     info!("Called index API");
     let param = query.into_inner();
-    let response = post_service::get_all_posts();
-    build_response(&param.format, &response)
+    match post_service::get_all_posts().await {
+        Ok(response) => build_response(&param.format, &response),
+        Err(e) => {
+            error!("Error in api_index: {:?}", e);
+            HttpResponse::InternalServerError().json(
+                ApiResponse::builder()
+                    .status("Error".to_string())
+                    .result(ResponseContent::Reason("Internal server error".to_string()))
+                    .build(),
+            )
+        }
+    }
 }
 
 #[get("/{id}")]
@@ -64,12 +81,29 @@ pub async fn show(
         .body(body_str)
 }
 
-pub async fn api_show(info: web::Path<i32>, query: web::Query<PostQueries>) -> impl Responder {
+// pub async fn api_show(info: web::Path<i32>, query: web::Query<PostQueries>) -> impl Responder {
+//     info!("Called show API");
+//     let info = info.into_inner();
+//     let param = query.into_inner();
+//     let response = post_service::get_post(info);
+//     build_response(&param.format, &response)
+// }
+pub async fn api_show(info: web::Path<i32>, query: web::Query<PostQueries>) -> impl HttpResponse {
     info!("Called show API");
-    let info = info.into_inner();
+    let id = info.into_inner();
     let param = query.into_inner();
-    let response = post_service::get_post(info);
-    build_response(&param.format, &response)
+    match post_service::get_post(id).await {
+        Ok(response) => build_response(&param.format, &response),
+        Err(e) => {
+            error!("Error in api_show: {:?}", e);
+            HttpResponse::InternalServerError().json(
+                ApiResponse::builder()
+                    .status("Error".to_string())
+                    .result(ResponseContent::Reason("Internal server error".to_string()))
+                    .build(),
+            )
+        }
+    }
 }
 
 pub async fn not_found() -> impl Responder {

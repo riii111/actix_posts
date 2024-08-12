@@ -1,3 +1,5 @@
+use crate::models::posts::Post;
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::fs;
 
@@ -18,6 +20,13 @@ pub fn get_all() -> Vec<Message> {
     json_data
 }
 
+pub async fn api_get_all() -> Result<Vec<Post>> {
+    let file = fs::read_to_string(DATA_FILENAME)?;
+    let mut posts: Vec<Post> = serde_json::from_str(&file)?;
+    posts.sort_by(|a, b| b.posted.cmp(&a.posted));
+    Ok(posts)
+}
+
 pub fn get(id: i32) -> Message {
     let file = fs::read_to_string(DATA_FILENAME).unwrap();
     let json_data: Vec<Message> = serde_json::from_str(&file).unwrap();
@@ -31,6 +40,12 @@ pub fn get(id: i32) -> Message {
         message = json_data[index].clone();
     }
     message
+}
+
+pub async fn api_get(id: i32) -> Result<Option<Post>> {
+    let file = fs::read_to_string("data.json")?;
+    let posts: Vec<Post> = serde_json::from_str(&file)?;
+    Ok(posts.into_iter().find(|post| post.id == id))
 }
 
 pub fn create(mut message: Message) -> Message {

@@ -228,6 +228,7 @@ dependencies = [
  "actix-session",
  "actix-web",
  "actix-web-flash-messages",
+ "anyhow",
  "chrono",
  "env_logger",
  "log",
