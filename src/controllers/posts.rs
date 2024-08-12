@@ -1,4 +1,5 @@
-use crate::payloads::posts::build_response;
+use crate::common::response_builder::ApiResponseBuilder;
+use crate::common::response_formatter::build_response;
 use crate::query_params::PostQueries;
 use crate::repositories::posts as post_repository;
 use crate::services::posts as post_service;

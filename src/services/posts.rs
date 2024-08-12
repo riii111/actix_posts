@@ -1,4 +1,4 @@
-use crate::payloads::posts::{ApiResponse, ResponseContent};
+use crate::common::response::{ApiResponse, ResponseContent};
 use crate::repositories::posts as post_model;
 
 pub fn get_all_posts() -> ApiResponse {
