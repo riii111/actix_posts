@@ -13,13 +13,13 @@ pub fn app(cfg: &mut web::ServiceConfig) {
         .service(
             web::scope("/api").service(
                 web::scope("/posts")
-                    .route("", web::get().to(posts_v2::api_index))
-                    .route("/{id}", web::get().to(posts_v2::api_show))
-                    .route("", web::post().to(posts_v2::api_create)),
-                // .route("", web::put().to(posts::api_update)),
+                    .route("", web::get().to(posts_v2::index))
+                    .route("/{id}", web::get().to(posts_v2::show))
+                    .route("", web::post().to(posts_v2::create)),
+                // .route("", web::put().to(posts::update)),
             ),
         )
-        .default_service(web::to(crate::controllers::posts_v2::api_not_found))
+        .default_service(web::to(crate::controllers::posts_v2::not_found))
         .service(
             web::scope("/posts")
                 .service(posts_v1::index)
