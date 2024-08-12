@@ -1,9 +1,7 @@
 use crate::payloads::posts::{ApiResponse, ResponseContent};
 use crate::repositories::posts as post_model;
-use log::info;
 
 pub fn get_all_posts() -> ApiResponse {
-    info!("サービス: 全ての投稿を取得");
     let posts = post_model::get_all();
     ApiResponse::builder()
         .status("OK".to_string())
@@ -12,7 +10,6 @@ pub fn get_all_posts() -> ApiResponse {
 }
 
 pub fn get_post(id: i32) -> ApiResponse {
-    info!("サービス: 特定の投稿を取得");
     let post = post_model::get(id);
     ApiResponse::builder()
         .status("OK".to_string())
@@ -21,7 +18,6 @@ pub fn get_post(id: i32) -> ApiResponse {
 }
 
 pub fn create_post(message: post_model::Message) -> ApiResponse {
-    info!("サービス: 新しい投稿を作成");
     let created_message = post_model::create(message);
     ApiResponse::builder()
         .status("OK".to_string())

@@ -3,7 +3,7 @@ use actix_web::{middleware::Logger, App, HttpServer};
 use env_logger::Env;
 use std::io::Result;
 
-mod endpoints;
+mod controllers;
 mod middleware;
 mod payloads;
 mod query_params;
