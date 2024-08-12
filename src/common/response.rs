@@ -1,10 +1,10 @@
-use crate::models::posts::Message;
+use crate::models::posts::Post;
 use serde::Serialize;
 
 #[derive(Serialize, Debug)]
 pub enum ResponseContent {
-    Items(Vec<Message>),
-    Item(Message),
+    Items(Vec<Post>),
+    Item(Post),
     Reason(String),
     None,
 }

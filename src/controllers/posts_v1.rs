@@ -1,6 +1,6 @@
 /* コンテンツを含めて返すposts */
 
-use crate::models::posts::Message;
+use crate::models::posts::Post;
 use crate::repositories::posts_v1 as post_v1_repository;
 use actix_session::Session;
 use actix_web::{get, post, web, HttpResponse, Responder};
@@ -13,7 +13,7 @@ use tera::Context;
 #[get("")]
 pub async fn index(tmpl: web::Data<tera::Tera>, messages: IncomingFlashMessages) -> impl Responder {
     info!("Called index");
-    let posts = post_repository::get_all();
+    let posts = post_v1_repository::get_all();
     let mut context = Context::new();
 
     for message in messages.iter() {
@@ -39,7 +39,7 @@ pub async fn show(
 ) -> impl Responder {
     info!("Called show");
     let info = info.into_inner();
-    let post = post_repository::get(info);
+    let post = post_v1_repository::get(info);
     let mut context = Context::new();
     for message in messages.iter() {
         match message.level() {
@@ -68,7 +68,7 @@ pub async fn new(tmpl: web::Data<tera::Tera>, session: Session) -> impl Responde
         .get::<String>("sender")
         .unwrap()
         .unwrap_or_else(|| "名無しさん".to_string());
-    let post = Message {
+    let post = Post {
         id: 0,
         sender: sender,
         content: "".to_string(),
@@ -97,7 +97,7 @@ pub struct CreateForm {
 pub async fn create(params: web::Form<CreateForm>, session: Session) -> impl Responder {
     info!("Called create");
     let now: DateTime<Local> = Local::now();
-    let mut message = Message {
+    let mut message = Post {
         id: 0,
         posted: now.format("%Y-%m-%d%H:%M:%S").to_string(),
         sender: params.sender.clone(),

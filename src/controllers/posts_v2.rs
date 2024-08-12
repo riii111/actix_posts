@@ -68,10 +68,10 @@ pub async fn not_found() -> HttpResponse {
     HttpResponse::NotFound().json(response)
 }
 
-// pub async fn create(params: web::Json<Message>) -> impl Responder {
+// pub async fn create(params: web::Json<Post>) -> impl Responder {
 //     info!("Called create API");
 //     let now: DateTime<Local> = Local::now();
-//     let message = Message {
+//     let message = Post {
 //         id: 0,
 //         posted: now.format("%Y-%m-%d %H:%M:%S").to_string(),
 //         sender: params.sender.clone(),
